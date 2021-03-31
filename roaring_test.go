@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/willf/bitset"
+	"fmt"
 )
 
 func TestReverseIteratorCount(t *testing.T) {
@@ -250,19 +251,26 @@ func TestFastCard(t *testing.T) {
 }
 
 func TestIntersects1(t *testing.T) {
-	bm := NewBitmap()
-	bm.Add(1)
-	bm.AddRange(21, 26)
-	bm2 := NewBitmap()
-	bm2.Add(25)
+	x :=  uint(MaxUint16)
+	w := x>>6
+	fmt.Printf("%b",x)
+	fmt.Printf("%b",w)
+	fmt.Printf("%b",x & 63)
+	fmt.Printf("%b", int64(1) << (x & 63))
 
-	assert.True(t, bm2.Intersects(bm))
-
-	bm.Remove(25)
-	assert.Equal(t, false, bm2.Intersects(bm))
-
-	bm.AddRange(1, 100000)
-	assert.True(t, bm2.Intersects(bm))
+	//bm := NewBitmap()
+	//bm.Add(1)
+	//bm.AddRange(21, 26)
+	//bm2 := NewBitmap()
+	//bm2.Add(25)
+	//
+	//assert.True(t, bm2.Intersects(bm))
+	//
+	//bm.Remove(25)
+	//assert.Equal(t, false, bm2.Intersects(bm))
+	//
+	//bm.AddRange(1, 100000)
+	//assert.True(t, bm2.Intersects(bm))
 }
 
 func TestRangePanic(t *testing.T) {

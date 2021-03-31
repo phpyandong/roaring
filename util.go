@@ -108,16 +108,17 @@ func fillArrayXOR(container []uint16, bitmap1, bitmap2 []uint64) {
 		}
 	}
 }
-
+//拿到高 16位，即前半部分
 func highbits(x uint32) uint16 {
 	return uint16(x >> 16)
 }
+//拿到低 16位，即后半部分
 func lowbits(x uint32) uint16 {
 	return uint16(x & maxLowBit)
 }
 
 const maxLowBit = 0xFFFF
-
+//翻转bitmap范围
 func flipBitmapRange(bitmap []uint64, start int, end int) {
 	if start >= end {
 		return
@@ -130,7 +131,7 @@ func flipBitmapRange(bitmap []uint64, start int, end int) {
 	}
 	bitmap[endword] ^= ^uint64(0) >> (uint(-end) % 64)
 }
-
+//重置bitmap 范围
 func resetBitmapRange(bitmap []uint64, start int, end int) {
 	if start >= end {
 		return

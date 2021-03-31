@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"github.com/RoaringBitmap/roaring/internal"
+	"github.com/phpyandong/roaring/internal"
 )
 
 type container interface {
@@ -23,7 +23,7 @@ type container interface {
 	rank(uint16) int
 
 	iadd(x uint16) bool                   // inplace, returns true if x was new.
-	iaddReturnMinimized(uint16) container // may change return type to minimize storage.
+	iaddReturnMinimized(uint16) container // may change return type to minimize storage.可能改变返回类型以减少存储。
 
 	//addRange(start, final int) container  // range is [firstOfRange,lastOfRange) (unused)
 	iaddRange(start, endx int) container // i stands for inplace, range is [firstOfRange,endx)
@@ -94,8 +94,11 @@ func rangeOfOnes(start, last int) container {
 	return newRunContainer16Range(uint16(start), uint16(last))
 }
 
+//每个32位的整形，高16位会被作为key存储到short[] keys中，低16位则被看做value，存储到Container[] values中的某个Container中。
+// keys和values通过下标一一对应。size则标示了当前包含的key-value pair的数量，即keys和values中有效数据的数量。
+
 type roaringArray struct {
-	keys            []uint16
+	keys            []uint16 //每个32位的整形，高16位会被作为key存储到short[] keys中，低16位则被看做value
 	containers      []container `msg:"-"` // don't try to serialize directly.
 	needCopyOnWrite []bool
 	copyOnWrite     bool
@@ -321,17 +324,18 @@ func (ra *roaringArray) getUnionedWritableContainer(pos int, other container) co
 	return ra.getContainerAtIndex(pos).ior(other)
 
 }
-
+//根据高位的index获取需要写的容器，
 func (ra *roaringArray) getWritableContainerAtIndex(i int) container {
 	if ra.needCopyOnWrite[i] {
-		ra.containers[i] = ra.containers[i].clone()
+		ra.containers[i] = ra.containers[i].clone() //找到对应容器，进行copy ，写时复制
 		ra.needCopyOnWrite[i] = false
 	}
-	return ra.containers[i]
+	return ra.containers[i] //返回操作的容器
 }
-
+//根据前16位作为key,找到对应的index
 func (ra *roaringArray) getIndex(x uint16) int {
 	// before the binary search, we optimize for frequent cases
+	//在二分搜索之前，我们对常见情况进行了优化
 	size := len(ra.keys)
 	if (size == 0) || (ra.keys[size-1] == x) {
 		return size - 1
@@ -375,7 +379,7 @@ func (ra *roaringArray) removeAtIndex(i int) {
 
 	ra.resize(len(ra.keys) - 1)
 }
-
+//把修改后的容器重新覆盖到对应位置
 func (ra *roaringArray) setContainerAtIndex(i int, c container) {
 	ra.containers[i] = c
 }

@@ -12,10 +12,11 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/RoaringBitmap/roaring/internal"
+	"github.com/phpyandong/roaring/internal"
 )
 
 // Bitmap represents a compressed bitmap where you can add integers.
+// Bitmap表示一个压缩的位图，可以添加整数。
 type Bitmap struct {
 	highlowcontainer roaringArray
 }
@@ -131,6 +132,8 @@ func NewBitmap() *Bitmap {
 }
 
 // New creates a new empty Bitmap (same as NewBitmap)
+
+//新加一个空的bitmap
 func New() *Bitmap {
 	return &Bitmap{}
 }
@@ -477,10 +480,11 @@ func (rb *Bitmap) Maximum() uint32 {
 }
 
 // Contains returns true if the integer is contained in the bitmap
+//Contains如果位图中包含整数则返回true ;是否存在X
 func (rb *Bitmap) Contains(x uint32) bool {
-	hb := highbits(x)
-	c := rb.highlowcontainer.getContainer(hb)
-	return c != nil && c.contains(lowbits(x))
+	hb := highbits(x)//获取高16位
+	c := rb.highlowcontainer.getContainer(hb)//根据高16位key获取容器
+	return c != nil && c.contains(lowbits(x)) //该容器（才是bitmap）是否包含低16位
 }
 
 // ContainsInt returns true if the integer is contained in the bitmap (this is a convenience method, the parameter is casted to uint32 and Contains is called)
@@ -569,17 +573,23 @@ func AddOffset64(x *Bitmap, offset int64) (answer *Bitmap) {
 }
 
 // Add the integer x to the bitmap
+//将整数加入到bitmap
 func (rb *Bitmap) Add(x uint32) {
-	hb := highbits(x)
-	ra := &rb.highlowcontainer
-	i := ra.getIndex(hb)
+	hb := highbits(x)         //获取高16位
+	ra := &rb.highlowcontainer//拿到bitmap的容器
+	i := ra.getIndex(hb) //根据高16位作为key 获取 对应的位置
 	if i >= 0 {
 		var c container
-		c = ra.getWritableContainerAtIndex(i).iaddReturnMinimized(lowbits(x))
-		rb.highlowcontainer.setContainerAtIndex(i, c)
+		c = ra.getWritableContainerAtIndex(i).  //有的话，拿到这个容器
+			iaddReturnMinimized(lowbits(x))   //往这个容器添加数据，并返回该容器
+		rb.highlowcontainer.setContainerAtIndex(i, c)//获得新容器，覆盖旧的容器
 	} else {
+		//如果没有找到，说明不存在，因此要新建一个 key容器
 		newac := newArrayContainer()
-		rb.highlowcontainer.insertNewKeyValueAt(-i-1, hb, newac.iaddReturnMinimized(lowbits(x)))
+		//把key容器加入到 key容器列表中
+		rb.highlowcontainer.insertNewKeyValueAt(
+			-i-1, hb, newac.iaddReturnMinimized(lowbits(x)),
+			)
 	}
 }
 

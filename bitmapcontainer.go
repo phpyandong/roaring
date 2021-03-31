@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"unsafe"
 )
-
+//低位用container存储，而且当数据量小于4096时用arrayCotainer，高于4096时用bitmapContainer。
 type bitmapContainer struct {
-	cardinality int
-	bitmap      []uint64
+	cardinality int //基数
+	bitmap      []uint64 //实际的bitmap,用于存储 打撒后的数字
 }
 
 func (bc bitmapContainer) String() string {
@@ -167,7 +167,7 @@ func newReverseBitmapContainerShortIterator(a *bitmapContainer) *reverseBitmapCo
 func (bc *bitmapContainer) getReverseIterator() shortIterable {
 	return newReverseBitmapContainerShortIterator(bc)
 }
-
+//低位用container存储，而且当数据量小于4096时用arrayCotainer，高于4096时用bitmapContainer。
 type bitmapContainerManyIterator struct {
 	ptr    *bitmapContainer
 	base   int
@@ -303,15 +303,15 @@ func (bc *bitmapContainer) equals(o container) bool {
 	}
 	return true
 }
-
+//往bitmap容器加入一个数字，返回最小化的容器
 func (bc *bitmapContainer) iaddReturnMinimized(i uint16) container {
 	bc.iadd(i)
-	if bc.isFull() {
+	if bc.isFull() {//容器满了，新建容器
 		return newRunContainer16Range(0, MaxUint16)
 	}
 	return bc
 }
-
+//加入到bitmap todo
 func (bc *bitmapContainer) iadd(i uint16) bool {
 	x := int(i)
 	previous := bc.bitmap[x/64]
@@ -935,11 +935,21 @@ func (bc *bitmapContainer) iandNotBitmapSurely(value2 *bitmapContainer) containe
 	}
 	return bc
 }
-
+//该bitmap是否包含指定的数字
 func (bc *bitmapContainer) contains(i uint16) bool { //testbit
 	x := uint(i)
+	//hash 算法
 	w := bc.bitmap[x>>6]
 	mask := uint64(1) << (x & 63)
+	//x :=  uint(math.MaxUint64)
+	//fmt.Printf("%b\n",x)
+	//fmt.Printf("%b\n", x>>6)//右移6位，除以(2^6 =64),直接舍去后6位
+	//fmt.Printf("%b\n",(x & 63))//获取后6位
+	//fmt.Printf("%b\n", int64(1) << (x & 63))
+	//1111111111111111111111111111111111111111111111111111111111 111101
+	//1111111111111111111111111111111111111111111111111111111111
+	//                                           111101
+	//10000000000000000000000000000000000000000000000000000000000000
 	return (w & mask) != 0
 }
 
