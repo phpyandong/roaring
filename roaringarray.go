@@ -114,6 +114,11 @@ func newRoaringArray() *roaringArray {
 //    we don't bother to check the needCopyOnWrite bits. We replace
 //    (possibly all) elements of ra.containers in-place with space
 //    optimized versions.
+// runoptimization压缩元素容器以最小化空间消耗。
+//问:这是如何与copyOnWrite和needCopyOnWrite交互的?
+//由于我们不改变逻辑内容，只改变表示法，
+//我们不用费心检查需要的copyonwrite位。
+//我们替换(可能是所有)ra元素。带有空间优化版本的就地容器。
 func (ra *roaringArray) runOptimize() {
 	for i := range ra.containers {
 		ra.containers[i] = ra.containers[i].toEfficientContainer()

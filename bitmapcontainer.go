@@ -1092,6 +1092,7 @@ func (bc *bitmapContainer) numberOfRuns() int {
 }
 
 // convert to run or array *if needed*
+//如果需要，转换为run或array *
 func (bc *bitmapContainer) toEfficientContainer() container {
 
 	numRuns := bc.numberOfRuns()

@@ -5,7 +5,7 @@ import (
 )
 
 type arrayContainer struct {
-	content []uint16
+	content []uint16  //最多个数就是2^16=65535
 }
 
 func (ac *arrayContainer) String() string {

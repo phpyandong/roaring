@@ -104,6 +104,9 @@ func (rb *Bitmap) FromBuffer(buf []byte) (p int64, err error) {
 }
 
 // RunOptimize attempts to further compress the runs of consecutive values found in the bitmap
+// runoptimization尝试进一步压缩位图中连续值
+//对于数列11,12,13,14,15，它会压缩为11,4
+//对于数列11,12,13,14,15,21,22，它会压缩为11,4,21,1
 func (rb *Bitmap) RunOptimize() {
 	rb.highlowcontainer.runOptimize()
 }

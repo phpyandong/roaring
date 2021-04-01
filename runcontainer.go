@@ -204,6 +204,12 @@ func newRunContainer16FromVals(alreadySorted bool, vals ...uint16) *runContainer
 // newRunContainer16FromBitmapContainer makes a new run container from bc,
 // somewhat efficiently. For reference, see the Java
 // https://github.com/RoaringBitmap/RoaringBitmap/blob/master/src/main/java/org/roaringbitmap/RunContainer.java#L145-L192
+////从bc创建一个新的运行容器，
+/// /比较有效率。如需参考，请参见Java
+//压缩方案
+//对于数列11，它会压缩为11,0；
+//对于数列11,12,13,14,15，它会压缩为11,4；
+//对于数列11,12,13,14,15,21,22，它会压缩为11,4,21,1；
 func newRunContainer16FromBitmapContainer(bc *bitmapContainer) *runContainer16 {
 
 	rc := &runContainer16{}
